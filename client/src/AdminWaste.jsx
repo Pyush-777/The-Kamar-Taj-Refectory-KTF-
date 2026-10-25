@@ -3,9 +3,6 @@ import {
     Scale,
     Trash2,
     Plus,
-    Calendar,
-    AlertCircle,
-    TrendingDown,
     Leaf,
     RefreshCw,
     IndianRupee
@@ -56,8 +53,8 @@ function AdminWaste() {
     };
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchData(); // eslint-disable-line react-hooks/set-state-in-effect
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();

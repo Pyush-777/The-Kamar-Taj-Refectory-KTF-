@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, User, Mail, Lock, IdCard, Home, Building } from "lucide-react";
+import { Utensils, User, Mail, Lock, IdCard, Building } from "lucide-react";
 import api from "./api";
 
 function Register({ onSwitch, onRegistered }) {

@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
@@ -7,7 +8,6 @@ require("dotenv").config();
 const User = require("./models/User");
 const Meal = require("./models/Meal");
 const Booking = require("./models/Booking");
-const WasteLog = require("./models/WasteLog");
 const Notification = require("./models/Notification");
 
 const seedDatabase = async () => {
@@ -16,14 +16,16 @@ const seedDatabase = async () => {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("MongoDB connected successfully.");
 
-        // Clean existing seed if needed or update
+        // 1. Create or update the demo admin account
         console.log("Setting up demo users...");
 
         const adminPasswordHash = await bcrypt.hash("Admin@12345", 12);
         const studentPasswordHash = await bcrypt.hash("Student@12345", 12);
 
-        // 1. Upsert Admin User
-        let admin = await User.findOne({ email: "admin@kamartaj.edu" });
+        let admin = await User.findOne({
+            email: "admin@kamartaj.edu"
+        });
+
         if (!admin) {
             admin = await User.create({
                 name: "Ancient One (Mess Warden)",
@@ -34,16 +36,21 @@ const seedDatabase = async () => {
                 hostel: "Administration Wing",
                 roomNumber: "W-101"
             });
-            console.log("Created admin: admin@kamartaj.edu / Admin@12345");
+
+            console.log("Created demo admin.");
         } else {
             admin.role = "admin";
             admin.password = adminPasswordHash;
             await admin.save();
-            console.log("Admin account updated.");
+
+            console.log("Updated demo admin.");
         }
 
-        // 2. Upsert Student User
-        let student = await User.findOne({ email: "student@kamartaj.edu" });
+        // 2. Create or update the first demo student
+        let student = await User.findOne({
+            email: "student@kamartaj.edu"
+        });
+
         if (!student) {
             student = await User.create({
                 name: "Mradul Kumar",
@@ -56,16 +63,20 @@ const seedDatabase = async () => {
                 hostel: "Kamar-Taj Hall A",
                 roomNumber: "302"
             });
-            console.log("Created student: student@kamartaj.edu / Student@12345");
+
+            console.log("Created demo student.");
         } else {
             student.password = studentPasswordHash;
             await student.save();
         }
 
-        // 3. Upsert Student 2
-        let student2 = await User.findOne({ email: "pyush@kamartaj.edu" });
+        // 3. Create the second demo student if missing
+        let student2 = await User.findOne({
+            email: "pyush@kamartaj.edu"
+        });
+
         if (!student2) {
-            student2 = await User.create({
+            await User.create({
                 name: "Pyush Kumar Singh",
                 email: "pyush@kamartaj.edu",
                 password: studentPasswordHash,
@@ -76,23 +87,20 @@ const seedDatabase = async () => {
                 hostel: "Kamar-Taj Hall B",
                 roomNumber: "214"
             });
+
+            console.log("Created second demo student.");
         }
 
-        // 4. Create sample meals for today and tomorrow
-        console.log("Creating scheduled meals...");
-        const now = new Date();
-
-        const getTodayAt = (hours, minutes) => {
-            const d = new Date();
-            d.setHours(hours, minutes, 0, 0);
-            return d;
-        };
+        // 4. Generate tomorrow's meal dates and deadlines
+        console.log("Creating or updating scheduled meals...");
 
         const getTomorrowAt = (hours, minutes) => {
-            const d = new Date();
-            d.setDate(d.getDate() + 1);
-            d.setHours(hours, minutes, 0, 0);
-            return d;
+            const date = new Date();
+
+            date.setDate(date.getDate() + 1);
+            date.setHours(hours, minutes, 0, 0);
+
+            return date;
         };
 
         const sampleMeals = [
@@ -100,8 +108,17 @@ const seedDatabase = async () => {
                 mealType: "breakfast",
                 date: getTomorrowAt(8, 0),
                 bookingDeadline: getTomorrowAt(6, 30),
-                serviceWindow: { start: "07:30", end: "09:45" },
-                menu: ["Masala Dosa", "Coconut Chutney", "Hot Sambar", "Boiled Eggs", "Filter Coffee"],
+                serviceWindow: {
+                    start: "07:30",
+                    end: "09:45"
+                },
+                menu: [
+                    "Masala Dosa",
+                    "Coconut Chutney",
+                    "Hot Sambar",
+                    "Boiled Eggs",
+                    "Filter Coffee"
+                ],
                 capacity: 180,
                 bookedCount: 42,
                 price: 45,
@@ -113,8 +130,18 @@ const seedDatabase = async () => {
                 mealType: "lunch",
                 date: getTomorrowAt(13, 0),
                 bookingDeadline: getTomorrowAt(11, 0),
-                serviceWindow: { start: "12:30", end: "14:30" },
-                menu: ["Shahi Paneer", "Dal Makhani", "Jeera Rice", "Butter Naan", "Boondi Raita", "Gulab Jamun"],
+                serviceWindow: {
+                    start: "12:30",
+                    end: "14:30"
+                },
+                menu: [
+                    "Shahi Paneer",
+                    "Dal Makhani",
+                    "Jeera Rice",
+                    "Butter Naan",
+                    "Boondi Raita",
+                    "Gulab Jamun"
+                ],
                 capacity: 220,
                 bookedCount: 68,
                 price: 85,
@@ -126,8 +153,15 @@ const seedDatabase = async () => {
                 mealType: "snacks",
                 date: getTomorrowAt(17, 30),
                 bookingDeadline: getTomorrowAt(16, 0),
-                serviceWindow: { start: "17:00", end: "18:30" },
-                menu: ["Aloo Samosa with Mint Chutney", "Veg Cutlets", "Masala Chai"],
+                serviceWindow: {
+                    start: "17:00",
+                    end: "18:30"
+                },
+                menu: [
+                    "Aloo Samosa with Mint Chutney",
+                    "Veg Cutlets",
+                    "Masala Chai"
+                ],
                 capacity: 150,
                 bookedCount: 25,
                 price: 35,
@@ -139,8 +173,17 @@ const seedDatabase = async () => {
                 mealType: "dinner",
                 date: getTomorrowAt(20, 0),
                 bookingDeadline: getTomorrowAt(18, 30),
-                serviceWindow: { start: "19:45", end: "21:45" },
-                menu: ["Kadai Mushroom / Chicken Curry", "Yellow Dal Tadka", "Steamed Basmati", "Tandoori Roti", "Ice Cream"],
+                serviceWindow: {
+                    start: "19:45",
+                    end: "21:45"
+                },
+                menu: [
+                    "Kadai Mushroom / Chicken Curry",
+                    "Yellow Dal Tadka",
+                    "Steamed Basmati",
+                    "Tandoori Roti",
+                    "Ice Cream"
+                ],
                 capacity: 200,
                 bookedCount: 84,
                 price: 90,
@@ -151,23 +194,43 @@ const seedDatabase = async () => {
         ];
 
         for (const mealData of sampleMeals) {
-            // Find if exists
+            // Find a meal of this type scheduled for the same calendar day.
+            const startOfDay = new Date(mealData.date);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const endOfDay = new Date(mealData.date);
+            endOfDay.setHours(23, 59, 59, 999);
+
             const existing = await Meal.findOne({
                 mealType: mealData.mealType,
                 date: {
-                    $gte: new Date(new Date(mealData.date).setHours(0, 0, 0, 0)),
-                    $lte: new Date(new Date(mealData.date).setHours(23, 59, 59, 999))
+                    $gte: startOfDay,
+                    $lte: endOfDay
                 }
             });
 
             if (!existing) {
+                // No meal exists for tomorrow: create it.
                 const createdMeal = await Meal.create(mealData);
-                console.log(`Created meal schedule: ${mealData.mealType}`);
 
-                // Create a booking for Mradul Kumar
-                if (mealData.mealType === "breakfast" || mealData.mealType === "lunch") {
-                    const bookingCode = crypto.randomBytes(24).toString("hex");
-                    const qrCode = await QRCode.toDataURL(bookingCode, { errorCorrectionLevel: "H", margin: 2 });
+                console.log(`Created ${mealData.mealType} meal.`);
+
+                // Add a demo booking only when creating a new meal.
+                if (
+                    mealData.mealType === "breakfast" ||
+                    mealData.mealType === "lunch"
+                ) {
+                    const bookingCode = crypto
+                        .randomBytes(24)
+                        .toString("hex");
+
+                    const qrCode = await QRCode.toDataURL(
+                        bookingCode,
+                        {
+                            errorCorrectionLevel: "H",
+                            margin: 2
+                        }
+                    );
 
                     await Booking.create({
                         student: student._id,
@@ -176,24 +239,67 @@ const seedDatabase = async () => {
                         qrCode,
                         status: "booked"
                     });
+
+                    console.log(
+                        `Created demo booking for ${mealData.mealType}.`
+                    );
                 }
+            } else {
+                // Update the existing demo meal's schedule and menu.
+                // Preserve its ID and current bookedCount.
+                existing.date = mealData.date;
+                existing.bookingDeadline = mealData.bookingDeadline;
+                existing.serviceWindow = mealData.serviceWindow;
+                existing.menu = mealData.menu;
+                existing.capacity = mealData.capacity;
+                existing.price = mealData.price;
+                existing.rebateAmount = mealData.rebateAmount;
+                existing.createdBy = admin._id;
+
+                // Do not reopen a meal if its deadline has already passed.
+                existing.isBookingOpen =
+                    new Date(mealData.bookingDeadline) > new Date() &&
+                    Number(existing.bookedCount || 0) <
+                        Number(mealData.capacity);
+
+                await existing.save();
+
+                console.log(
+                    `Updated ${mealData.mealType} meal schedule.`
+                );
             }
         }
 
-        // Add some notifications
-        await Notification.create({
+        // 5. Create a welcome notification only if one does not already exist.
+        const existingNotification = await Notification.findOne({
             user: student._id,
-            title: "Welcome to The Kamar-Taj Refectory",
-            message: "Your dining account is active. You can reserve meals, receive instant entry QR passes, and earn rebates on advance cancellations.",
-            type: "system"
+            title: "Welcome to The Kamar-Taj Refectory"
         });
 
+        if (!existingNotification) {
+            await Notification.create({
+                user: student._id,
+                title: "Welcome to The Kamar-Taj Refectory",
+                message:
+                    "Your dining account is active. You can reserve meals, " +
+                    "receive instant entry QR passes, and earn rebates " +
+                    "on advance cancellations.",
+                type: "system"
+            });
+
+            console.log("Created welcome notification.");
+        }
+
         console.log("Seeding completed successfully!");
-        console.log("Default Admin: admin@kamartaj.edu | Admin@12345");
-        console.log("Default Student: student@kamartaj.edu | Student@12345");
+        console.log("Admin: admin@kamartaj.edu | Admin@12345");
+        console.log("Student: student@kamartaj.edu | Student@12345");
+
+        await mongoose.disconnect();
         process.exit(0);
     } catch (err) {
         console.error("Seeding error:", err);
+
+        await mongoose.disconnect().catch(() => {});
         process.exit(1);
     }
 };

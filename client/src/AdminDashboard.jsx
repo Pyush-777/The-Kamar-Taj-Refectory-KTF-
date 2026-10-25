@@ -10,8 +10,7 @@ import {
     ToggleLeft,
     ToggleRight,
     RefreshCw,
-    Sparkles,
-    AlertCircle
+    Sparkles
 } from "lucide-react";
 import api from "./api";
 
@@ -91,7 +90,7 @@ function AdminDashboard() {
     };
 
     useEffect(() => {
-        fetchMeals();
+        fetchMeals(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     function applyTemplate(tpl) {

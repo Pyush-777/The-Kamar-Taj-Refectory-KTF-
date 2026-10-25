@@ -4,8 +4,6 @@ import {
     Wallet,
     Receipt,
     CalendarCheck,
-    CheckCircle,
-    XCircle,
     RefreshCw,
     Download,
     ShieldCheck,
@@ -34,7 +32,7 @@ function StudentBilling() {
     };
 
     useEffect(() => {
-        fetchBilling();
+        fetchBilling(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     const printStatement = () => {

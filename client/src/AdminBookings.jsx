@@ -7,9 +7,7 @@ import {
     Camera,
     Download,
     Filter,
-    Clock,
-    Utensils,
-    CalendarDays
+    Clock
 } from "lucide-react";
 import api from "./api";
 import QRScanner from "./QRScanner";
@@ -42,7 +40,7 @@ function AdminBookings() {
     }
 
     useEffect(() => {
-        fetchBookings();
+        fetchBookings(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     const filteredBookings = bookings.filter((booking) => {

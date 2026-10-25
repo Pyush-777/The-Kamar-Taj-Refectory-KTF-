@@ -9,7 +9,6 @@ import {
     AlertTriangle,
     XCircle,
     UserCheck,
-    RefreshCw,
     Clock,
     Utensils,
     ShieldAlert
@@ -44,78 +43,7 @@ function QRScanner({ onScanSuccess }) {
         setCameraActive(false);
     };
 
-    // Start HTML5 Camera
-    const startCamera = async () => {
-        setCameraError("");
-        await stopCamera();
-
-        try {
-            const scanner = new Html5Qrcode("qr-reader-container");
-            scannerRef.current = scanner;
-
-            const config = {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-            };
-
-            await scanner.start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => {
-                    handleCodeVerification(decodedText);
-                },
-                () => {
-                    // Ignore transient scanning frames
-                }
-            );
-
-            setCameraActive(true);
-        } catch (err) {
-            console.error("Camera start failed:", err);
-            setCameraError(
-                err.name === "NotAllowedError"
-                    ? "Camera permission denied. Please allow camera access in browser settings or use image upload / manual code."
-                    : "Unable to access camera hardware. Try file upload or manual code entry."
-            );
-            setCameraActive(false);
-        }
-    };
-
-    useEffect(() => {
-        if (scanMode === "camera") {
-            startCamera();
-        } else {
-            stopCamera();
-        }
-
-        return () => {
-            stopCamera();
-        };
-    }, [scanMode]);
-
-    // Handle File QR upload
-    const handleFileUpload = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setCameraError("");
-        setLoading(true);
-
-        try {
-            const html5QrCode = new Html5Qrcode("qr-file-processor");
-            const decodedText = await html5QrCode.scanFile(file, true);
-            html5QrCode.clear();
-            await handleCodeVerification(decodedText);
-        } catch (err) {
-            console.error("File QR scan error:", err);
-            setCameraError("Could not read a valid QR code from this image. Please ensure the code is clear and well-lit.");
-            playErrorBeep();
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Verify code on server
+    // Verify code on server — declared before startCamera so the camera callback can reference it
     const handleCodeVerification = async (code) => {
         if (!code || loading) return;
 
@@ -166,6 +94,77 @@ function QRScanner({ onScanSuccess }) {
             };
 
             setLastScanResult(errorResult);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Start HTML5 Camera
+    const startCamera = async () => {
+        setCameraError("");
+        await stopCamera();
+
+        try {
+            const scanner = new Html5Qrcode("qr-reader-container");
+            scannerRef.current = scanner;
+
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+            };
+
+            await scanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    handleCodeVerification(decodedText);
+                },
+                () => {
+                    // Ignore transient scanning frames
+                }
+            );
+
+            setCameraActive(true);
+        } catch (err) {
+            console.error("Camera start failed:", err);
+            setCameraError(
+                err.name === "NotAllowedError"
+                    ? "Camera permission denied. Please allow camera access in browser settings or use image upload / manual code."
+                    : "Unable to access camera hardware. Try file upload or manual code entry."
+            );
+            setCameraActive(false);
+        }
+    };
+
+    useEffect(() => {
+        if (scanMode === "camera") {
+            startCamera(); // eslint-disable-line react-hooks/set-state-in-effect
+        } else {
+            stopCamera();
+        }
+
+        return () => {
+            stopCamera();
+        };
+    }, [scanMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Handle File QR upload
+    const handleFileUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setCameraError("");
+        setLoading(true);
+
+        try {
+            const html5QrCode = new Html5Qrcode("qr-file-processor");
+            const decodedText = await html5QrCode.scanFile(file, true);
+            html5QrCode.clear();
+            await handleCodeVerification(decodedText);
+        } catch (err) {
+            console.error("File QR scan error:", err);
+            setCameraError("Could not read a valid QR code from this image. Please ensure the code is clear and well-lit.");
+            playErrorBeep();
         } finally {
             setLoading(false);
         }

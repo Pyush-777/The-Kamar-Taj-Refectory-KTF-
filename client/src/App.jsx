@@ -3,7 +3,6 @@ import {
     Utensils,
     LogOut,
     LayoutDashboard,
-    CalendarCheck,
     ClipboardList,
     Menu,
     X,
@@ -12,7 +11,6 @@ import {
     BarChart3,
     Scale,
     Shield,
-    UserCheck,
     Clock
 } from "lucide-react";
 
@@ -62,7 +60,7 @@ function App() {
                     console.warn("Profile sync error:", err.message);
                 });
         }
-    }, [page]);
+    }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleLogin(loggedInUser) {
         setUser(loggedInUser);

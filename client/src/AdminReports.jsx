@@ -7,22 +7,17 @@ import {
     Tooltip,
     Legend,
     ResponsiveContainer,
-    AreaChart,
-    Area,
     PieChart,
     Pie,
     Cell
 } from "recharts";
 import {
-    TrendingUp,
     Users,
     CheckCircle,
-    XCircle,
     Percent,
     IndianRupee,
     RefreshCw,
-    Calendar,
-    FileSpreadsheet
+    Calendar
 } from "lucide-react";
 import api from "./api";
 
@@ -55,7 +50,7 @@ function AdminReports() {
     };
 
     useEffect(() => {
-        fetchReportData();
+        fetchReportData(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     const pieData = overview

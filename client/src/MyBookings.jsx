@@ -9,7 +9,6 @@ import {
     Clock,
     AlertTriangle,
     IndianRupee,
-    Sparkles,
     Utensils
 } from "lucide-react";
 import api from "./api";
@@ -39,7 +38,7 @@ function MyBookings() {
     }
 
     useEffect(() => {
-        fetchBookings();
+        fetchBookings(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     async function confirmCancelBooking() {

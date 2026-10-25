@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
     Bell,
-    Check,
     CheckCheck,
     CalendarCheck,
     XCircle,
@@ -23,7 +22,6 @@ function NotificationCenter() {
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [loading, setLoading] = useState(false);
 
     const dropdownRef = useRef(null);
 
@@ -37,12 +35,14 @@ function NotificationCenter() {
         }
     };
 
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
         fetchNotifications();
         // Poll every 30 seconds for live updates
         const interval = setInterval(fetchNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     // Close dropdown on outside click
     useEffect(() => {

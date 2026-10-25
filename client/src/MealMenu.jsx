@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
     Coffee,
@@ -9,11 +10,7 @@ import {
     ArrowRight,
     RefreshCw,
     Clock,
-    IndianRupee,
-    CheckCircle2,
-    Sparkles,
-    Ticket,
-    Download
+    Sparkles
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import api from "./api";
@@ -41,6 +38,7 @@ function MealMenu({ user }) {
         try {
             const response = await api.get("/meals");
             const data = response.data;
+
             setMeals(Array.isArray(data) ? data : data.meals || []);
         } catch (err) {
             setError(
@@ -53,7 +51,7 @@ function MealMenu({ user }) {
     }
 
     useEffect(() => {
-        fetchMeals();
+        fetchMeals(); // eslint-disable-line react-hooks/set-state-in-effect
     }, []);
 
     async function handleBooking(meal) {
@@ -73,6 +71,7 @@ function MealMenu({ user }) {
             });
 
             setMessage(response.data.message || "Reservation confirmed!");
+
             setConfirmedBooking({
                 booking: response.data.booking,
                 qrCode: response.data.qrCode,
@@ -93,7 +92,13 @@ function MealMenu({ user }) {
     function formatDate(date) {
         if (!date) return "Date not specified";
 
-        return new Date(date).toLocaleDateString("en-IN", {
+        const parsedDate = new Date(date);
+
+        if (Number.isNaN(parsedDate.getTime())) {
+            return "Invalid date";
+        }
+
+        return parsedDate.toLocaleDateString("en-IN", {
             weekday: "short",
             day: "numeric",
             month: "short",
@@ -103,9 +108,17 @@ function MealMenu({ user }) {
 
     function formatTime(date) {
         if (!date) return "";
-        return new Date(date).toLocaleTimeString("en-IN", {
+
+        const parsedDate = new Date(date);
+
+        if (Number.isNaN(parsedDate.getTime())) {
+            return "";
+        }
+
+        return parsedDate.toLocaleTimeString("en-IN", {
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
+            hour12: true
         });
     }
 
@@ -123,7 +136,8 @@ function MealMenu({ user }) {
                     <p className="eyebrow">REFECTORY OFFERINGS</p>
                     <h1>Daily Dining Schedule & Reservation</h1>
                     <p className="muted-text">
-                        Browse upcoming meals, reserve before deadlines, and receive instant entry QR passes.
+                        Browse upcoming meals, reserve before deadlines,
+                        and receive instant entry QR passes.
                     </p>
                 </div>
 
@@ -141,19 +155,29 @@ function MealMenu({ user }) {
 
             {/* Meal Filter Strip */}
             <div className="tab-bar">
-                {["all", "breakfast", "lunch", "snacks", "dinner"].map((category) => (
-                    <button
-                        key={category}
-                        className={`tab-btn ${selectedCategory === category ? "active" : ""}`}
-                        onClick={() => setSelectedCategory(category)}
-                    >
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </button>
-                ))}
+                {["all", "breakfast", "lunch", "snacks", "dinner"].map(
+                    (category) => (
+                        <button
+                            key={category}
+                            className={`tab-btn ${
+                                selectedCategory === category ? "active" : ""
+                            }`}
+                            onClick={() => setSelectedCategory(category)}
+                        >
+                            {category.charAt(0).toUpperCase() +
+                                category.slice(1)}
+                        </button>
+                    )
+                )}
             </div>
 
-            {message && <div className="alert alert-success">{message}</div>}
-            {error && <div className="alert alert-error">{error}</div>}
+            {message && (
+                <div className="alert alert-success">{message}</div>
+            )}
+
+            {error && (
+                <div className="alert alert-error">{error}</div>
+            )}
 
             {loading ? (
                 <div className="empty-state">
@@ -167,25 +191,65 @@ function MealMenu({ user }) {
                     </div>
                     <h3>No scheduled meals found</h3>
                     <p>
-                        There are currently no meal offerings listed for this filter. Check back shortly.
+                        There are currently no meal offerings listed for
+                        this filter. Check back shortly.
                     </p>
                 </div>
             ) : (
                 <div className="meal-grid">
                     {filteredMeals.map((meal) => {
                         const Icon = mealIcons[meal.mealType] || Coffee;
+
                         const capacity = Number(meal.capacity || 0);
                         const bookedCount = Number(meal.bookedCount || 0);
-                        const remaining = Math.max(0, capacity - bookedCount);
-                        const deadlinePassed = new Date(meal.bookingDeadline) <= new Date();
-                        const isClosed = meal.isBookingOpen === false || deadlinePassed || remaining <= 0;
+
+                        const remaining = Math.max(
+                            0,
+                            capacity - bookedCount
+                        );
+
+                        // Validate the booking deadline.
+                        const deadline = meal.bookingDeadline
+                            ? new Date(meal.bookingDeadline)
+                            : null;
+
+                        const hasValidDeadline =
+                            deadline !== null &&
+                            !Number.isNaN(deadline.getTime());
+
+                        const deadlinePassed =
+                            !hasValidDeadline ||
+                            deadline.getTime() <= Date.now();
+
+                        // Do not allow booking when closed, expired,
+                        // or when the meal has reached its capacity.
+                        const isClosed =
+                            meal.isBookingOpen === false ||
+                            deadlinePassed ||
+                            remaining <= 0;
+
+                        let buttonText = "Reserve Meal Pass";
+
+                        if (bookingId === meal._id) {
+                            buttonText = "Reserving...";
+                        } else if (remaining <= 0) {
+                            buttonText = "Capacity Full";
+                        } else if (deadlinePassed) {
+                            buttonText = "Booking Closed";
+                        } else if (meal.isBookingOpen === false) {
+                            buttonText = "Not Available";
+                        }
 
                         return (
-                            <article className={`meal-card ${meal.mealType}`} key={meal._id}>
+                            <article
+                                className={`meal-card ${meal.mealType}`}
+                                key={meal._id}
+                            >
                                 <div className={`meal-banner ${meal.mealType}`}>
                                     <div className="meal-icon-wrapper">
                                         <Icon size={26} />
                                     </div>
+
                                     <span className="meal-type-label">
                                         {meal.mealType.toUpperCase()}
                                     </span>
@@ -195,8 +259,12 @@ function MealMenu({ user }) {
                                     <div className="meal-header-row">
                                         <div>
                                             <h2 className="meal-title">
-                                                {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
+                                                {meal.mealType
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    meal.mealType.slice(1)}
                                             </h2>
+
                                             <span className="date-badge">
                                                 <CalendarDays size={14} />
                                                 {formatDate(meal.date)}
@@ -204,8 +272,13 @@ function MealMenu({ user }) {
                                         </div>
 
                                         <div className="price-badge">
-                                            <span>₹{meal.price || 60}</span>
-                                            <small>Rebate: ₹{meal.rebateAmount || 45}</small>
+                                            <span>
+                                                ₹{meal.price || 60}
+                                            </span>
+                                            <small>
+                                                Rebate: ₹
+                                                {meal.rebateAmount || 45}
+                                            </small>
                                         </div>
                                     </div>
 
@@ -214,18 +287,25 @@ function MealMenu({ user }) {
                                         <div className="meal-window-badge">
                                             <Clock size={14} />
                                             <span>
-                                                Service: {meal.serviceWindow.start} - {meal.serviceWindow.end}
+                                                Service:{" "}
+                                                {meal.serviceWindow.start} -{" "}
+                                                {meal.serviceWindow.end}
                                             </span>
                                         </div>
                                     )}
 
-                                    {/* Dishes list */}
+                                    {/* Dishes List */}
                                     <div className="menu-tags-list">
-                                        {(meal.menu || []).map((dish, idx) => (
-                                            <span className="dish-pill" key={idx}>
-                                                {dish}
-                                            </span>
-                                        ))}
+                                        {(meal.menu || []).map(
+                                            (dish, idx) => (
+                                                <span
+                                                    className="dish-pill"
+                                                    key={idx}
+                                                >
+                                                    {dish}
+                                                </span>
+                                            )
+                                        )}
                                     </div>
 
                                     {/* Capacity Progress */}
@@ -233,8 +313,10 @@ function MealMenu({ user }) {
                                         <div className="capacity-label-row">
                                             <span>
                                                 <Users size={14} />
-                                                <strong>{remaining}</strong> seats remaining
+                                                <strong>{remaining}</strong>{" "}
+                                                seats remaining
                                             </span>
+
                                             <small>
                                                 {bookedCount}/{capacity} booked
                                             </small>
@@ -243,49 +325,52 @@ function MealMenu({ user }) {
                                         <div className="capacity-track">
                                             <div
                                                 className={`capacity-fill ${
-                                                    remaining < 20 ? "low" : "normal"
+                                                    remaining < 20
+                                                        ? "low"
+                                                        : "normal"
                                                 }`}
                                                 style={{
                                                     width:
                                                         capacity > 0
-                                                            ? `${Math.min(
-                                                                  100,
-                                                                  (bookedCount / capacity) * 100
-                                                              )}%`
+                                                            ? `${
+                                                                  Math.min(
+                                                                      100,
+                                                                      (bookedCount /
+                                                                          capacity) *
+                                                                          100
+                                                                  )
+                                                              }%`
                                                             : "0%"
                                                 }}
                                             />
                                         </div>
                                     </div>
 
-                                    {/* Deadline text */}
+                                    {/* Booking Deadline */}
                                     <div className="deadline-badge">
                                         <Clock size={13} />
                                         <span>
-                                            Booking Cutoff: {formatDate(meal.bookingDeadline)} {formatTime(meal.bookingDeadline)}
+                                            Booking Cutoff:{" "}
+                                            {formatDate(meal.bookingDeadline)}{" "}
+                                            {formatTime(meal.bookingDeadline)}
                                         </span>
                                     </div>
 
-                                    {/* Reserve CTA */}
+                                    {/* Reserve Button */}
                                     {isStudent && (
                                         <button
                                             className="primary-button full-width reserve-btn"
                                             onClick={() => handleBooking(meal)}
-                                            disabled={bookingId === meal._id || isClosed}
+                                            disabled={
+                                                bookingId === meal._id ||
+                                                isClosed
+                                            }
                                         >
-                                            {bookingId === meal._id ? (
-                                                "Reserving..."
-                                            ) : remaining <= 0 ? (
-                                                "Capacity Full"
-                                            ) : deadlinePassed ? (
-                                                "Booking Closed"
-                                            ) : !meal.isBookingOpen ? (
-                                                "Not Available"
-                                            ) : (
-                                                <>
-                                                    Reserve Meal Pass
-                                                    <ArrowRight size={17} />
-                                                </>
+                                            {buttonText}
+
+                                            {buttonText ===
+                                                "Reserve Meal Pass" && (
+                                                <ArrowRight size={17} />
                                             )}
                                         </button>
                                     )}
@@ -302,9 +387,13 @@ function MealMenu({ user }) {
                     <div className="modal-content confirmation-pass-modal">
                         <div className="modal-header">
                             <div className="modal-title-with-icon">
-                                <Sparkles size={24} className="text-emerald" />
+                                <Sparkles
+                                    size={24}
+                                    className="text-emerald"
+                                />
                                 <h3>Meal Reservation Confirmed!</h3>
                             </div>
+
                             <button
                                 className="icon-button"
                                 onClick={() => setConfirmedBooking(null)}
@@ -319,7 +408,9 @@ function MealMenu({ user }) {
                                 <strong>
                                     {confirmedBooking.meal?.mealType?.toUpperCase()}
                                 </strong>{" "}
-                                on {formatDate(confirmedBooking.meal?.date)} is ready.
+                                on{" "}
+                                {formatDate(confirmedBooking.meal?.date)} is
+                                ready.
                             </p>
 
                             {confirmedBooking.qrCode && (
@@ -329,8 +420,10 @@ function MealMenu({ user }) {
                                         alt="Meal Pass QR Code"
                                         className="qr-img-large"
                                     />
+
                                     <p className="qr-popup-hint">
-                                        Show this QR code at the refectory entrance turnstile.
+                                        Show this QR code at the refectory
+                                        entrance turnstile.
                                     </p>
                                 </div>
                             )}
@@ -338,12 +431,21 @@ function MealMenu({ user }) {
                             <div className="pass-meta-box">
                                 <div>
                                     <small>Booking Code</small>
-                                    <code>{confirmedBooking.booking?.bookingCode?.slice(0, 20)}...</code>
+                                    <code>
+                                        {confirmedBooking.booking?.bookingCode?.slice(
+                                            0,
+                                            20
+                                        )}
+                                        ...
+                                    </code>
                                 </div>
+
                                 <div>
                                     <small>Eligible Cancellation Rebate</small>
                                     <strong className="text-emerald">
-                                        ₹{confirmedBooking.meal?.rebateAmount || 45}
+                                        ₹
+                                        {confirmedBooking.meal?.rebateAmount ||
+                                            45}
                                     </strong>
                                 </div>
                             </div>

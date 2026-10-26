@@ -1,4 +1,3 @@
-
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
@@ -2620,3 +2619,640 @@ select:focus-visible {
   }
 }
 
+/* ========================================================
+   RESPONSIVE-ONLY OVERRIDES
+   Appended below the original styles.
+   Existing design and colors are preserved.
+   ======================================================== */
+
+/* Prevent accidental horizontal overflow */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.app-shell,
+.main-layout,
+.content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.content > * {
+  min-width: 0;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+/* Keep long content from pushing layouts wider */
+.brand,
+.user-area,
+.page-heading,
+.section-heading,
+.table-toolbar,
+.booking-card,
+.booking-main,
+.booking-actions,
+.pass-body,
+.pass-details,
+.scanner-header-bar,
+.banner-header {
+  min-width: 0;
+}
+
+.brand strong,
+.user-details strong,
+.user-details small {
+  overflow-wrap: anywhere;
+}
+
+/* Tablets and smaller laptops */
+@media (max-width: 1100px) {
+  .meal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pass-grid {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, 320px), 1fr)
+    );
+  }
+
+  .charts-grid {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, 320px), 1fr)
+    );
+  }
+
+  .content {
+    padding: 28px;
+  }
+
+  .admin-form-card {
+    width: 100%;
+  }
+
+  .table-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    width: min(100%, 290px);
+  }
+}
+
+/* Mobile navigation and page layout */
+@media (max-width: 760px) {
+  .topbar {
+    height: 70px;
+    gap: 10px;
+    padding: 0 14px;
+  }
+
+  .brand {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand strong {
+    max-width: 190px;
+    font-size: 0.82rem;
+    line-height: 1.3;
+  }
+
+  .brand small {
+    font-size: 0.66rem;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .topbar-center {
+    display: none;
+  }
+
+  .topbar-right,
+  .user-area {
+    gap: 8px;
+  }
+
+  .user-details,
+  .logout-button {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .main-layout {
+    display: block;
+    min-height: calc(100vh - 70px);
+  }
+
+  .sidebar {
+    position: fixed;
+    z-index: 999;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw);
+    height: calc(100dvh - 70px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    box-shadow: 15px 0 40px #00000030;
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .content {
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 17px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 23px;
+  }
+
+  .page-heading > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-heading h1 {
+    font-size: clamp(1.55rem, 6vw, 1.85rem);
+    overflow-wrap: anywhere;
+  }
+
+  .heading-actions {
+    width: 100%;
+  }
+
+  .heading-actions > button {
+    flex: 0 1 auto;
+  }
+
+  .meal-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .meal-card {
+    min-width: 0;
+  }
+
+  .meal-banner {
+    padding: 18px;
+  }
+
+  .meal-body {
+    padding: 18px;
+  }
+
+  .meal-title-row {
+    align-items: flex-start;
+  }
+
+  .booking-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 17px;
+  }
+
+  .booking-main {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .booking-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .qr-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .admin-form-card,
+  .verify-card {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .admin-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 17px;
+  }
+
+  .form-field-wide {
+    grid-column: auto;
+  }
+
+  .verify-form {
+    flex-wrap: wrap;
+  }
+
+  .verify-form input {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .table-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .table-toolbar > * {
+    max-width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .table-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 650px;
+  }
+
+  .pass-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pass-body {
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 15px;
+  }
+
+  .qr-container {
+    max-width: 100%;
+  }
+
+  .qr-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .pass-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .scanner-entrance-wrapper {
+    padding: 15px;
+  }
+
+  .scanner-header-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .scanner-tabs {
+    flex-wrap: wrap;
+  }
+
+  .scanner-tab {
+    min-width: 0;
+    padding: 10px;
+  }
+
+  .camera-viewport {
+    min-height: 220px;
+  }
+
+  .input-group {
+    flex-wrap: wrap;
+  }
+
+  .input-group input {
+    min-width: 0;
+  }
+
+  .banner-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .banner-time {
+    flex-wrap: wrap;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, 220px), 1fr)
+    );
+  }
+
+  .charts-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chart-card {
+    min-width: 0;
+    padding: 15px;
+  }
+
+  .chart-container {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .donut-box {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .today-strip {
+    align-items: flex-start;
+  }
+
+  .strip-metrics {
+    gap: 10px;
+  }
+
+  .student-pass-card {
+    align-items: flex-start;
+  }
+
+  .modal-backdrop {
+    align-items: center;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 14px;
+  }
+
+  .auth-card {
+    padding: 25px 19px;
+    border-radius: 18px;
+  }
+
+  .auth-card h1 {
+    font-size: 1.7rem;
+  }
+
+  .content {
+    padding: 20px 12px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-heading .secondary-button,
+  .heading-actions button {
+    max-width: 100%;
+  }
+
+  .heading-actions {
+    gap: 8px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button {
+    padding: 10px 12px;
+  }
+
+  .meal-title-row {
+    flex-direction: column;
+  }
+
+  .booking-main {
+    align-items: flex-start;
+  }
+
+  .booking-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .booking-actions {
+    gap: 10px;
+  }
+
+  .pass-header {
+    padding: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pass-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .qr-container {
+    align-self: center;
+  }
+
+  .pass-details {
+    width: 100%;
+  }
+
+  .demo-buttons-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .section-heading-icon {
+    width: 39px;
+    height: 39px;
+  }
+
+  .verify-card {
+    padding: 15px;
+  }
+
+  .verify-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .verify-form .primary-button {
+    width: 100%;
+  }
+
+  .table-toolbar {
+    padding: 13px;
+  }
+
+  .eco-banner {
+    align-items: flex-start;
+    padding: 14px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .stat-value {
+    font-size: 1.35rem;
+  }
+
+  .modal-body,
+  .modal-form {
+    padding: 15px;
+  }
+
+  .modal-actions {
+    padding: 13px 15px;
+  }
+
+  .pass-meta-box {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .verification-banner {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .banner-details-grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+}
+
+/* Extra-narrow phones */
+@media (max-width: 360px) {
+  .topbar {
+    padding: 0 9px;
+    gap: 5px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand strong {
+    max-width: 135px;
+    font-size: 0.74rem;
+  }
+
+  .brand small {
+    font-size: 0.62rem;
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mobile-menu-button {
+    padding: 6px;
+  }
+
+  .content {
+    padding: 17px 10px;
+  }
+
+  .auth-card {
+    padding: 22px 16px;
+  }
+
+  .meal-body {
+    padding: 15px;
+  }
+
+  .booking-card {
+    padding: 13px;
+  }
+
+  .pass-body {
+    padding: 12px;
+  }
+
+  .scanner-entrance-wrapper {
+    padding: 11px;
+  }
+
+  .admin-form-card {
+    padding: 14px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 16px);
+  }
+}

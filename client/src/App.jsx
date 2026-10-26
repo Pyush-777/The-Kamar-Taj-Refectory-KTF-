@@ -11,7 +11,7 @@ import {
     BarChart3,
     Scale,
     Shield,
-    Clock
+    Clock,
 } from "lucide-react";
 
 import Login from "./Login";
@@ -40,46 +40,82 @@ function App() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    // Live clock update
+    // Update the live clock every second.
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
         return () => clearInterval(timer);
     }, []);
 
-    // Refresh user profile
+    // Synchronize the logged-in user's profile with the backend.
     useEffect(() => {
-        if (user) {
-            api.get("/auth/me")
-                .then((res) => {
-                    if (res.data.user) {
-                        setUser(res.data.user);
-                        localStorage.setItem("user", JSON.stringify(res.data.user));
-                    }
-                })
-                .catch((err) => {
-                    console.warn("Profile sync error:", err.message);
-                });
-        }
-    }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+        if (!user) return;
 
+        let isMounted = true;
+
+        api.get("/auth/me")
+            .then((res) => {
+                if (isMounted && res.data.user) {
+                    setUser(res.data.user);
+                    localStorage.setItem(
+                        "user",
+                        JSON.stringify(res.data.user)
+                    );
+                }
+            })
+            .catch((err) => {
+                console.warn("Profile sync error:", err.message);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [page]); // Refresh the profile when the page changes.
+
+    // Handle successful login.
     function handleLogin(loggedInUser) {
         setUser(loggedInUser);
-        setPage(loggedInUser.role === "admin" ? "admin-bookings" : "meals");
+        setPage(
+            loggedInUser.role === "admin" ? "admin-bookings" : "meals"
+        );
+        setMobileMenuOpen(false);
     }
 
+    // Clear the local login session.
     function handleLogout() {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+
         setUser(null);
         setPage("meals");
         setAuthPage("login");
+        setMobileMenuOpen(false);
     }
 
+    // Navigate to a page and close the mobile sidebar.
     function navigate(nextPage) {
         setPage(nextPage);
         setMobileMenuOpen(false);
     }
 
+    // Close the mobile sidebar when the Escape key is pressed.
+    useEffect(() => {
+        function handleEscape(event) {
+            if (event.key === "Escape") {
+                setMobileMenuOpen(false);
+            }
+        }
+
+        window.addEventListener("keydown", handleEscape);
+
+        return () => {
+            window.removeEventListener("keydown", handleEscape);
+        };
+    }, []);
+
+    // Authentication screens.
     if (!user) {
         return (
             <div className="auth-page">
@@ -102,9 +138,10 @@ function App() {
 
     return (
         <div className="app-shell">
-            {/* Top Navigation Bar */}
+            {/* Top navigation bar */}
             <header className="topbar">
                 <button
+                    type="button"
                     className="brand"
                     onClick={() => navigate("meals")}
                     aria-label="Go to meal menu"
@@ -115,7 +152,9 @@ function App() {
 
                     <span className="brand-text">
                         <strong>The Kamar-Taj Refectory</strong>
-                        <small>Smart College Mess Management • Team OPM</small>
+                        <small>
+                            Smart College Mess Management • Team OPM
+                        </small>
                     </span>
                 </button>
 
@@ -126,30 +165,43 @@ function App() {
                             {currentTime.toLocaleTimeString("en-IN", {
                                 hour: "2-digit",
                                 minute: "2-digit",
-                                second: "2-digit"
+                                second: "2-digit",
                             })}
                         </span>
                     </div>
                 </div>
 
                 <div className="topbar-right">
-                    {/* In-App Notification Center */}
+                    {/* In-app notifications */}
                     <NotificationCenter />
 
-                    {/* User Profile Badge */}
+                    {/* Logged-in user information */}
                     <div className="user-area">
-                        <div className={`user-avatar ${isAdmin ? "admin" : "student"}`}>
-                            {isAdmin ? <Shield size={16} /> : (user.name || "U").charAt(0).toUpperCase()}
+                        <div
+                            className={`user-avatar ${
+                                isAdmin ? "admin" : "student"
+                            }`}
+                        >
+                            {isAdmin ? (
+                                <Shield size={16} />
+                            ) : (
+                                (user.name || "U")
+                                    .charAt(0)
+                                    .toUpperCase()
+                            )}
                         </div>
 
                         <div className="user-details">
                             <strong>{user.name || "User"}</strong>
                             <span className="role-tag">
-                                {isAdmin ? "Mess Admin" : `Student • ${user.studentId || "ID"}`}
+                                {isAdmin
+                                    ? "Mess Admin"
+                                    : `Student • ${user.studentId || "ID"}`}
                             </span>
                         </div>
 
                         <button
+                            type="button"
                             className="icon-button logout-button"
                             onClick={handleLogout}
                             title="Log out"
@@ -159,23 +211,57 @@ function App() {
                         </button>
                     </div>
 
+                    {/* Mobile menu toggle */}
                     <button
+                        type="button"
                         className="mobile-menu-button"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle navigation"
+                        onClick={() =>
+                            setMobileMenuOpen((open) => !open)
+                        }
+                        aria-label={
+                            mobileMenuOpen
+                                ? "Close navigation menu"
+                                : "Open navigation menu"
+                        }
+                        aria-expanded={mobileMenuOpen}
+                        aria-controls="app-sidebar"
                     >
-                        {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+                        {mobileMenuOpen ? (
+                            <X size={22} />
+                        ) : (
+                            <Menu size={22} />
+                        )}
                     </button>
                 </div>
             </header>
 
+            {/* Main application layout */}
             <div className="main-layout">
-                {/* Sidebar Navigation */}
-                <aside className={`sidebar ${mobileMenuOpen ? "sidebar-open" : ""}`}>
+                {/* Mobile backdrop; clicking it closes the sidebar */}
+                {mobileMenuOpen && (
+                    <button
+                        type="button"
+                        className="sidebar-backdrop"
+                        aria-label="Close navigation menu"
+                        onClick={() => setMobileMenuOpen(false)}
+                    />
+                )}
+
+                {/* Sidebar navigation */}
+                <aside
+                    id="app-sidebar"
+                    className={`sidebar ${
+                        mobileMenuOpen ? "sidebar-open" : ""
+                    }`}
+                    aria-label="Main navigation"
+                >
                     <p className="sidebar-label">DINING PORTAL</p>
 
                     <button
-                        className={`nav-item ${page === "meals" ? "active" : ""}`}
+                        type="button"
+                        className={`nav-item ${
+                            page === "meals" ? "active" : ""
+                        }`}
                         onClick={() => navigate("meals")}
                     >
                         <LayoutDashboard size={19} />
@@ -185,7 +271,10 @@ function App() {
                     {!isAdmin && (
                         <>
                             <button
-                                className={`nav-item ${page === "bookings" ? "active" : ""}`}
+                                type="button"
+                                className={`nav-item ${
+                                    page === "bookings" ? "active" : ""
+                                }`}
                                 onClick={() => navigate("bookings")}
                             >
                                 <Ticket size={19} />
@@ -193,11 +282,14 @@ function App() {
                             </button>
 
                             <button
-                                className={`nav-item ${page === "billing" ? "active" : ""}`}
+                                type="button"
+                                className={`nav-item ${
+                                    page === "billing" ? "active" : ""
+                                }`}
                                 onClick={() => navigate("billing")}
                             >
                                 <Receipt size={19} />
-                                Mess Bill & Rebates
+                                Mess Bill &amp; Rebates
                             </button>
                         </>
                     )}
@@ -205,17 +297,18 @@ function App() {
                     {isAdmin && (
                         <>
                             <p className="sidebar-label sidebar-label-spaced">
-                                ENTRANCE & VERIFICATION
+                                ENTRANCE &amp; VERIFICATION
                             </p>
 
                             <button
+                                type="button"
                                 className={`nav-item ${
                                     page === "admin-bookings" ? "active" : ""
                                 }`}
                                 onClick={() => navigate("admin-bookings")}
                             >
                                 <ClipboardList size={19} />
-                                QR Scanner & Bookings
+                                QR Scanner &amp; Bookings
                             </button>
 
                             <p className="sidebar-label sidebar-label-spaced">
@@ -223,7 +316,10 @@ function App() {
                             </p>
 
                             <button
-                                className={`nav-item ${page === "admin-meals" ? "active" : ""}`}
+                                type="button"
+                                className={`nav-item ${
+                                    page === "admin-meals" ? "active" : ""
+                                }`}
                                 onClick={() => navigate("admin-meals")}
                             >
                                 <Utensils size={19} />
@@ -231,17 +327,21 @@ function App() {
                             </button>
 
                             <button
+                                type="button"
                                 className={`nav-item ${
                                     page === "admin-reports" ? "active" : ""
                                 }`}
                                 onClick={() => navigate("admin-reports")}
                             >
                                 <BarChart3 size={19} />
-                                Analytics & Reports
+                                Analytics &amp; Reports
                             </button>
 
                             <button
-                                className={`nav-item ${page === "admin-waste" ? "active" : ""}`}
+                                type="button"
+                                className={`nav-item ${
+                                    page === "admin-waste" ? "active" : ""
+                                }`}
                                 onClick={() => navigate("admin-waste")}
                             >
                                 <Scale size={19} />
@@ -256,7 +356,7 @@ function App() {
                     </div>
                 </aside>
 
-                {/* Page Content Viewport */}
+                {/* Current page content */}
                 <main className="content">
                     {page === "meals" && <MealMenu user={user} />}
 
@@ -264,11 +364,17 @@ function App() {
 
                     {page === "billing" && !isAdmin && <StudentBilling />}
 
-                    {page === "admin-bookings" && isAdmin && <AdminBookings />}
+                    {page === "admin-bookings" && isAdmin && (
+                        <AdminBookings />
+                    )}
 
-                    {page === "admin-meals" && isAdmin && <AdminDashboard />}
+                    {page === "admin-meals" && isAdmin && (
+                        <AdminDashboard />
+                    )}
 
-                    {page === "admin-reports" && isAdmin && <AdminReports />}
+                    {page === "admin-reports" && isAdmin && (
+                        <AdminReports />
+                    )}
 
                     {page === "admin-waste" && isAdmin && <AdminWaste />}
                 </main>

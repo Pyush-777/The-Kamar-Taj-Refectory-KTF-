@@ -3256,3 +3256,10 @@ textarea {
     max-height: calc(100dvh - 16px);
   }
 }
+
+button {
+    transition: opacity 0.2s ease;
+}
+button:hover {
+    opacity: 0.9;
+}

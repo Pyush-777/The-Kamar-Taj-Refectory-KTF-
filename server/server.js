@@ -1,3 +1,4 @@
+
 // Import required packages
 const express = require("express");
 const cors = require("cors");
@@ -19,7 +20,13 @@ const testRoutes = require("./routes/testRoutes");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 // API routes
@@ -70,11 +77,11 @@ const startServer = async () => {
         const PORT = process.env.PORT || 5000;
 
         app.listen(PORT, () => {
-            console.log(`===============================================`);
-            console.log(` The Kamar-Taj Refectory Backend Active        `);
+            console.log("===============================================");
+            console.log(" The Kamar-Taj Refectory Backend Active        ");
             console.log(` Port: ${PORT}                                 `);
-            console.log(` System: MERN QR-Based Mess Check-In Ready     `);
-            console.log(`===============================================`);
+            console.log(" System: MERN QR-Based Mess Check-In Ready     ");
+            console.log("===============================================");
         });
     } catch (error) {
         console.error("Failed to start the server:", error.message);

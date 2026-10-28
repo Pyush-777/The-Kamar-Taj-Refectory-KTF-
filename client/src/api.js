@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Base URL of your Express backend
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://localhost:5001/api",
 });
 
 // Attach the saved JWT to protected requests

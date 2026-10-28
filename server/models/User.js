@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema(
             select: false
         },
 
+        // Whether the college email has been verified via OTP
+        emailVerified: {
+            type: Boolean,
+            default: false
+        },
+
         // User role
         role: {
             type: String,

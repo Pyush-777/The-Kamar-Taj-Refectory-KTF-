@@ -23,6 +23,7 @@ const makeAdmin = async () => {
             }
 
             user.role = "admin";
+            user.emailVerified = true;
             await user.save();
 
             console.log(`Admin role assigned successfully to ${email}!`);

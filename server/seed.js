@@ -32,6 +32,7 @@ const seedDatabase = async () => {
                 email: "admin@kamartaj.edu",
                 password: adminPasswordHash,
                 role: "admin",
+                emailVerified: true,
                 studentId: "FAC-001",
                 hostel: "Administration Wing",
                 roomNumber: "W-101"
@@ -40,6 +41,7 @@ const seedDatabase = async () => {
             console.log("Created demo admin.");
         } else {
             admin.role = "admin";
+            admin.emailVerified = true;
             admin.password = adminPasswordHash;
             await admin.save();
 
@@ -57,6 +59,7 @@ const seedDatabase = async () => {
                 email: "student@kamartaj.edu",
                 password: studentPasswordHash,
                 role: "student",
+                emailVerified: true,
                 studentId: "20253161",
                 balance: 1420,
                 totalRebates: 120,
@@ -67,6 +70,7 @@ const seedDatabase = async () => {
             console.log("Created demo student.");
         } else {
             student.password = studentPasswordHash;
+            student.emailVerified = true;
             await student.save();
         }
 
@@ -81,6 +85,7 @@ const seedDatabase = async () => {
                 email: "pyush@kamartaj.edu",
                 password: studentPasswordHash,
                 role: "student",
+                emailVerified: true,
                 studentId: "20253214",
                 balance: 1560,
                 totalRebates: 60,
